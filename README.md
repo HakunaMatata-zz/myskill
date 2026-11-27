@@ -7,13 +7,44 @@ HakunaMatata 的 Agent Skills 集合。可复用的 SKILL 包，供 Claude Code 
 | 技能 | 用途 | 依赖 | 来源 |
 |---|---|---|---|
 | [`last30days-cn`](skills/last30days-cn/) | 中文互联网热点搜集与研究：微博、小红书、B站、知乎、抖音、微信公众号、百度、今日头条 8 平台，支持每日全网热榜（`--hot`）与 30 天主题研究 | Python 3.8+ 标准库（零必需依赖） | [Jesseovo/last30days-skill-cn](https://github.com/Jesseovo/last30days-skill-cn) |
+| [`short-drama` 全家桶](skills/short-drama/)（12 个技能） | AI 短剧 / 漫剧全流程：原著分析 → 分集剧本 → 视觉设定 → 分镜 → 图/视频提示词 → 剪辑成片 → 审查 | Python 3.9+（部分技能需 ffmpeg） | [zenstory-ai/drama-skills](https://github.com/zenstory-ai/drama-skills) |
+
+### short-drama 的 12 个技能分工
+
+装了就是一套产线，彼此靠技能名路由，不需要手动调用。日常只用 `short-drama` 一个入口即可。
+
+| 技能 | 职责 | 产出 |
+|---|---|---|
+| `short-drama` | 总控：立项、配置、制作形态、Lookdev 统筹、路由、创作台、打包 | `short-drama.json` |
+| `short-drama-develop` | 开发创意、核心看点、改编方案、分集大纲 | 项目开发文档 |
+| `short-drama-novel-analyze` | 拆解长篇原著、抽样快评、分集候选 | `项目开发/source-analysis/` |
+| `short-drama-breakdown` | 拆解对标剧、同尺比对、视频反推剧本 | `项目开发/对标拆解.md` |
+| `short-drama-write` | 写或改单集剧本 | `剧集/<EP>/剧本.md` |
+| `short-drama-assets` | 人物、造型、地点、道具、声线设定 | `剧集/<EP>/视觉设定.md` |
+| `short-drama-image-prompts` | 静态设定图、视觉调性图、首尾帧提示词 | `剧集/<EP>/图片提示词.md` |
+| `short-drama-storyboard` | 分镜与首尾帧 | `剧集/<EP>/分镜.md` |
+| `short-drama-video-prompts` | 视频动态提示词、配乐提示词 | `剧集/<EP>/视频提示词.md` |
+| `short-drama-produce` | 调外部模型出图/出视频/配音（先预览，确认后执行） | 素材 |
+| `short-drama-edit` | 编排剪辑单、渲染成片 | `剧集/<EP>/剪辑单.md`、`制作成果/成片/` |
+| `short-drama-review` | 独立审稿、连戏核查、出片问题归因 | 审查报告 |
+
+**核心机制「连戏锁」**：跨镜不变的穿着、造型被写成可原样贴入提示词的固定短语；每镜首帧写明出场设定；`creator_markdown_check.py` 自动核对跨文档引用。这是防穿帮的主力。
+
+**所有付费生成都必须先预览再确认**，不会静默烧算力。
 
 ## 安装
 
 ### 方式一：一键脚本（最快）
 
 ```bash
+# 装漫剧全套（12 个技能）
+curl -fsSL https://raw.githubusercontent.com/HakunaMatata-zz/myskill/main/install.sh | sh -s drama
+
+# 只装热点搜集
 curl -fsSL https://raw.githubusercontent.com/HakunaMatata-zz/myskill/main/install.sh | sh -s last30days-cn
+
+# 装全部
+curl -fsSL https://raw.githubusercontent.com/HakunaMatata-zz/myskill/main/install.sh | sh -s all
 ```
 
 脚本会自动探测已有的技能目录（`~/.claude/skills` → `~/.workbuddy/skills` → `~/.codex/skills`）。
