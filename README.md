@@ -10,7 +10,18 @@ HakunaMatata 的 Agent Skills 集合。可复用的 SKILL 包，供 Claude Code 
 
 ## 安装
 
-### 方式一：整仓克隆（推荐）
+### 方式一：一键脚本（最快）
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/HakunaMatata-zz/myskill/main/install.sh | sh -s last30days-cn
+```
+
+脚本会自动探测已有的技能目录（`~/.claude/skills` → `~/.workbuddy/skills` → `~/.codex/skills`）。
+要指定目录，前置 `SKILLS_DIR=/your/path`。查看可用技能：`sh install.sh list`。
+
+> Windows 用户用 Git Bash 执行，或直接走方式二。
+
+### 方式二：整仓克隆
 
 ```bash
 git clone https://github.com/HakunaMatata-zz/myskill.git
@@ -26,7 +37,7 @@ cp -r myskill/skills/last30days-cn ~/.claude/skills/
 cp -r myskill/skills/last30days-cn ~/.workbuddy/skills/
 ```
 
-### 方式二：只取单个技能
+### 方式三：只取单个技能
 
 ```bash
 git clone --depth 1 --filter=blob:none --sparse https://github.com/HakunaMatata-zz/myskill.git
@@ -34,13 +45,13 @@ cd myskill
 git sparse-checkout set skills/last30days-cn
 ```
 
-### 方式三：交给 Agent
+### 方式四：交给 Agent
 
 把这句话发给你的 Agent：
 
 ```text
-把 https://github.com/HakunaMatata-zz/myskill 里的 skills/last30days-cn
-安装到你的技能目录，检查可用数据源，然后查看今天的全网热榜。
+执行 curl -fsSL https://raw.githubusercontent.com/HakunaMatata-zz/myskill/main/install.sh | sh -s last30days-cn
+安装技能，然后检查可用数据源并查看今天的全网热榜。
 ```
 
 ## 使用
