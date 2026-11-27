@@ -77,7 +77,7 @@ python scripts/last30days.py --diagnose
 
 ## 前置条件
 
-**开箱可用（无需登录、无需 Key）：** B站、今日头条、百度网页搜索、全网热榜。
+**开箱可用（无需登录、无需 Key）：** B站、今日头条、百度网页搜索、全网热榜。热榜抓取完全不需要登录。
 
 **需要登录态（扫码一次即可，需 Playwright）：** 小红书、微博、知乎、抖音。
 
@@ -88,7 +88,32 @@ python scripts/last30days.py login xiaohongshu   # 也支持 weibo / zhihu / dou
 
 不登录不会报错，会降级为「热榜匹配 + 公开搜索」，报告里会明确标注「只有公开链接，缺少互动数据」。
 
-**可选 Key：** `TIKHUB_API_KEY`（抖音）、`WECHAT_API_KEY`（公众号）、`BAIDU_API_KEY`（百度千帆）、`WEIBO_ACCESS_TOKEN`、`GITHUB_TOKEN`（提升额度）。详见技能内 `docs/usage.zh-CN.md`。
+### 实测覆盖（2026-11-27）
+
+| 平台 | 状态 | 实测结果 |
+|---|---|---|
+| 小红书 | ✅ 完整 | 19 条原始结果 / 4.6s |
+| 知乎 | ✅ 完整 | 20 条原始结果 / 4.6s |
+| 微博 | ✅ 完整 | 23 条原始结果 / 4.8s |
+| 抖音 | ✅ 完整 | 16 条原始结果 / 11.4s（页面自行签名，较慢） |
+| B站 | ✅ 完整 | 免登录 WBI 签名搜索 |
+| 今日头条 | ✅ 完整 | 免登录 |
+| 微信公众号 | ⚠️ 降级 | 搜狗微信触发反爬，需 `WECHAT_API_KEY` |
+| 百度 | ⚠️ 降级 | 需 `BAIDU_API_KEY`（千帆 AI 搜索），否则走网页搜索易被验证码拦截 |
+
+> **登录成功的判断不要只看 `login` 命令输出。** 它只比对 cookie 是否变化，页面加载失败时也会误报「登录成功」。装完必须跑一次 `python scripts/last30days.py "测试词" --search <平台> --days 7` 确认真的能返回结果。
+
+### 代理环境必读
+
+Chromium 不识别 `HTTP_PROXY` / `HTTPS_PROXY` 环境变量。如果你的机器需要走代理才能出网，必须先设置：
+
+```bash
+export LAST30DAYS_PROXY=http://127.0.0.1:7890   # 换成你的代理地址
+```
+
+否则浏览器会直连被重置，报 `ERR_CONNECTION_RESET`。本仓库已打补丁支持（会自动回退读取标准代理变量），详见 [PATCHES.md](PATCHES.md)。
+
+**可选 Key：** `TIKHUB_API_KEY`（抖音，可替代登录）、`WECHAT_API_KEY`（公众号）、`BAIDU_API_KEY`（百度千帆）、`WEIBO_ACCESS_TOKEN`、`GITHUB_TOKEN`（提升额度）。详见技能内 `docs/usage.zh-CN.md`。
 
 ## 合规提示
 

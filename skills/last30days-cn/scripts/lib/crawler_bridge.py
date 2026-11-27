@@ -55,6 +55,7 @@ _BROWSER_PATH_ENV = "LAST30DAYS_BROWSER_PATH"
 _BROWSER_CHANNEL_ENV = "LAST30DAYS_BROWSER_CHANNEL"
 _DISABLE_BROWSER_ENV = "LAST30DAYS_DISABLE_BROWSER"
 _CONCURRENCY_ENV = "LAST30DAYS_BROWSER_CONCURRENCY"
+_PROXY_ENV = "LAST30DAYS_PROXY"
 
 _DESKTOP_UA = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -180,6 +181,20 @@ def _get_semaphore() -> threading.BoundedSemaphore:
         return _semaphore
 
 
+def _proxy_server() -> str:
+    """返回需要透传给 Chromium 的 HTTP 代理。
+
+    Chromium 不读取 HTTP_PROXY/HTTPS_PROXY 环境变量，在必须走代理才能出网的
+    环境里（企业内网、沙箱）会直连失败并报 ERR_CONNECTION_RESET。优先取
+    LAST30DAYS_PROXY，其次回退到标准代理环境变量。
+    """
+    for key in (_PROXY_ENV, "HTTPS_PROXY", "https_proxy", "HTTP_PROXY", "http_proxy"):
+        value = os.environ.get(key, "").strip()
+        if value and not value.lower().startswith("socks"):
+            return value
+    return ""
+
+
 def _browser_launch_kwargs() -> Dict[str, Any]:
     """Return optional Playwright launch overrides for old machines."""
     kwargs: Dict[str, Any] = {}
@@ -189,6 +204,9 @@ def _browser_launch_kwargs() -> Dict[str, Any]:
         kwargs["executable_path"] = os.path.expanduser(browser_path)
     elif browser_channel:
         kwargs["channel"] = browser_channel
+    proxy = _proxy_server()
+    if proxy:
+        kwargs["proxy"] = {"server": proxy}
     return kwargs
 
 
